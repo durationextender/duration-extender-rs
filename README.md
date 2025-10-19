@@ -8,24 +8,24 @@ A lightweight, zero-dependency Rust crate that extends primitive integer types w
 
 Write expressive, human-readable code for timeouts, delays, and schedules without the verbosity of `Duration::from_secs()`.
 
-## Why duration-extender?
+## ⚠️ Breaking Changes in v0.3.0
 
-## ⚠️ Breaking Changes in v0.2.0
+**Overflow values now panic for all integer types**, in addition to negative values panicking for signed integers.
 
-**Negative values now panic instead of using absolute value.**
-
-Previously in v0.1.0:
+Previously in v0.2.0:
 ```rust
-(-5).minutes() == 5.minutes() // ❌ Surprising - used abs()
+(-5).minutes() // ❌ Panics
+u64::MAX.minutes() // ❌ Panics
 ```
 
-Now in v0.2.0:
+Now in v0.3.0:
 ```rust
 5.minutes()    // ✅ Works fine
 (-5).minutes() // ❌ Panics: "duration cannot be negative: got -5 minutes"
+u64::MAX.minutes() // ❌ Panics: "duration value ... overflows u64 seconds capacity"
 ```
 
-This change prevents silent bugs. See [CHANGELOG.md](CHANGELOG.md) for details.
+This makes the behavior fully explicit and safe. See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ---
 
@@ -45,18 +45,18 @@ let cache_ttl = 1.days();
 
 ## Features
 
-- **Fluent API** — Natural, readable syntax for duration creation
-- **Type-safe** — Works with `u64`, `u32`, `i64`, and `i32`
-- **Explicit errors** — Uses saturating arithmetic for overflow; panics on negative values with clear messages
-- **Zero dependencies** — Just the standard library
-- **Minimal overhead** — Compiles down to the same code as manual duration creation
+- **Fluent API** — Natural, readable syntax for duration creation.
+- **Type-safe** — Works with `u64`, `u32`, `i64`, and `i32`.
+- **Explicit errors** — Panics on overflow and negative values with clear messages.
+- **Zero dependencies** — Only the standard library.
+- **Minimal overhead** — Compiles down to the same code as manual duration creation.
 
 ## Installation
 
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-duration-extender = "0.2"  # ← Change from 0.1
+duration-extender = "0.3"
 ```
 
 ## Usage
@@ -68,18 +68,15 @@ use duration_extender::DurationExt;
 use std::time::Duration;
 
 fn main() {
-    // Create durations with clear, readable syntax
     let timeout = 10.seconds();
     let delay = 5.minutes();
     let long_wait = 2.days();
-    
-    // Combine durations naturally
+
     let total_time = 2.hours() + 30.minutes() + 15.seconds();
-    
-    // Works with variables
+
     let retry_count = 3;
     let backoff = retry_count.seconds();
-    
+
     // Signed integers must be non-negative (panics on negative)
     let elapsed = 100.seconds(); // ✅ Works
     // let bad = (-100).seconds(); // ❌ Panics!
@@ -112,8 +109,6 @@ let rate_limit = RateLimit::new(100, 1.minutes());
 
 ## Available Methods
 
-The `DurationExt` trait provides these methods:
-
 | Method | Equivalent |
 |--------|------------|
 | `.seconds()` | `Duration::from_secs(n)` |
@@ -121,21 +116,24 @@ The `DurationExt` trait provides these methods:
 | `.hours()` | `Duration::from_secs(n * 3600)` |
 | `.days()` | `Duration::from_secs(n * 86400)` |
 | `.weeks()` | `Duration::from_secs(n * 604800)` |
+| `.milliseconds()` | `Duration::from_millis(n)` |
+| `.microseconds()` | `Duration::from_micros(n)` |
+| `.nanoseconds()` | `Duration::from_nanos(n)` |
 
 ## Supported Types
 
 The `DurationExt` trait is implemented for:
 
-- `u64` and `u32` — Direct conversion
-- `i64` and `i32` — Panics on negative values to prevent bugs
+- `u64` and `u32` — Direct conversion.
+- `i64` and `i32` — Panics on negative values to prevent bugs.
 
-All operations use **saturating arithmetic** to prevent overflow panics.
+All operations now use **checked arithmetic** to prevent silent overflow.
 
 ## Safety Guarantees
 
-- **Overflow safe** — Saturating arithmetic prevents overflow panics
-- **Negative handling** — Signed integers panic on negative values with clear error messages
-- **Type safety** — Leverages Rust's type system for compile-time correctness
+- **Overflow checked** — Panics on overflow with a clear message.
+- **Negative handling** — Signed integers panic on negative values with clear error messages.
+- **Type safety** — Uses Rust's strong type system for compile-time correctness.
 
 ## Contributing
 
@@ -143,13 +141,12 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is dual-licensed under:
-
+Dual-licensed under:
 - [Apache License, Version 2.0](LICENSE-APACHE)
 - [MIT License](LICENSE-MIT)
 
-You may choose either license for your purposes.
+Choose whichever license suits your needs.
 
 ## Acknowledgments
 
-Inspired by duration extension patterns from other languages and the Rust community's focus on ergonomic APIs.
+Inspired by ergonomic duration APIs in other ecosystems and refined by community feedback.

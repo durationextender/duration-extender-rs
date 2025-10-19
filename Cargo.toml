@@ -1,7 +1,7 @@
 [package]
 name = "duration-extender"
-version = "0.2.0"
-edition = "2021" 
+version = "0.3.0"
+edition = "2021"
 authors = ["Dr. Vegapunk"]
 description = "Adds fluent, highly readable methods (like .minutes(), .hours()) directly to integer types (u32, i64, etc.) to easily create std::time::Duration."
 license = "MIT OR Apache-2.0"
