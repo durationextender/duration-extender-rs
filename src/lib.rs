@@ -173,6 +173,59 @@ impl DurationExt for i32 {
     }
 }
 
+impl DurationExt for f64 {
+    fn seconds(self) -> Duration {
+        Duration::from_secs_f64(self)
+    }
+
+    fn minutes(self) -> Duration {
+        Duration::from_secs_f64(self * 60.0)
+    }
+
+    fn hours(self) -> Duration {
+        Duration::from_secs_f64(self * 3600.0)
+    }
+
+    fn milliseconds(self) -> Duration {
+        Duration::from_secs_f64(self / 1000.0)
+    }
+
+    fn microseconds(self) -> Duration {
+        Duration::from_secs_f64(self / 1_000_000.0)
+    }
+
+    fn nanoseconds(self) -> Duration {
+        Duration::from_secs_f64(self / 1_000_000_000.0)
+    }
+}
+
+
+impl DurationExt for f32 {
+    fn seconds(self) -> Duration {
+        Duration::from_secs_f32(self)
+    }
+
+    fn minutes(self) -> Duration {
+        Duration::from_secs_f32(self * 60.0)
+    }
+
+    fn hours(self) -> Duration {
+        Duration::from_secs_f32(self * 3600.0)
+    }
+
+    fn milliseconds(self) -> Duration {
+        Duration::from_secs_f32(self / 1000.0)
+    }
+
+    fn microseconds(self) -> Duration {
+        Duration::from_secs_f32(self / 1_000_000.0)
+    }
+
+    fn nanoseconds(self) -> Duration {
+        Duration::from_secs_f32(self / 1_000_000_000.0)
+    }
+}
+
 // ===== Tests =====
 #[cfg(test)]
 mod tests {
@@ -263,5 +316,54 @@ mod tests {
         assert_eq!(val.seconds(), Duration::from_secs(5));
         assert_eq!(val.minutes(), Duration::from_secs(300));
         assert_eq!(val.hours(), Duration::from_secs(18000));
+    }
+
+    #[test]
+    fn test_f64_fractional() {
+        let half = 0.5.seconds();
+        assert_eq!(half, Duration::from_millis(500));
+        
+        let two_half = 2.5.minutes();
+        assert_eq!(two_half, Duration::from_secs(150));
+        
+        let one_half_hour = 1.5.hours();
+        assert_eq!(one_half_hour, Duration::from_secs(5400));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_f64_nan_panics() {
+        let _ = f64::NAN.seconds();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_f64_infinity_panics() {
+        let _ = f64::INFINITY.seconds();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_f64_negative_panics() {
+        let _ = (-1.5).seconds();
+    }
+
+    #[test]
+    fn test_f64_zero() {
+        let zero = 0.0.seconds();
+        assert_eq!(zero, Duration::ZERO);
+    }
+
+    // --- f32 Tests ---
+    #[test]
+    fn test_f32_fractional() {
+        let half: f32 = 0.5;
+        assert_eq!(half.seconds(), Duration::from_millis(500));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_f32_nan_panics() {
+        let _ = f32::NAN.seconds();
     }
 }

@@ -8,16 +8,33 @@ A lightweight, zero-dependency Rust crate that extends primitive integer types w
 
 Write expressive, human-readable code for timeouts, delays, and schedules without the verbosity of `Duration::from_secs()`.
 
+## ⚠️ What's New in v0.5.0
+
+**Added f64 and f32 support for fractional durations!**
+```rust
+// New in v0.5.0 - Fractional durations
+let half_second = 0.5.seconds();
+let two_and_half_minutes = 2.5.minutes();
+
+// Still works - Integer durations
+let timeout = 30.seconds();
+let delay = 5.minutes();
+```
+
+Thanks to @oconnor663 for the suggestion!
+
+---
+
 ## ⚠️ Breaking Changes in v0.4.0
 
 - `.days()` and `.weeks()` methods are **removed**.
-  ```rust
+```rust
   // ❌ Not allowed anymore
   // let week = 1.weeks();
 
   // ✅ Use hours instead
   let week = (7 * 24).hours();
-  ```
+```
 
 ## ⚠️ Breaking Changes in v0.3.0
 
@@ -51,35 +68,40 @@ let cache_ttl = Duration::from_secs(24 * 60 * 60);
 ```rust
 let timeout = 30.seconds();
 let delay = 5.minutes();
+let cache_ttl = 24.hours();
 ```
 
 ## Features
 
-- **Fluent API** — Natural, readable syntax for duration creation.
-- **Type-safe** — Works with `u64`, `u32`, `i64`, and `i32`.
-- **Explicit errors** — Panics on overflow and negative values with clear messages.
-- **Zero dependencies** — Only the standard library.
-- **Minimal overhead** — Compiles down to the same code as manual duration creation.
+- **Fluent API** — Natural, readable syntax for duration creation
+- **Type-safe** — Works with `u64`, `u32`, `i64`, `i32`, `f64`, and `f32`
+- **Explicit errors** — Panics on overflow and negative values with clear messages
+- **Zero dependencies** — Only the standard library
+- **Minimal overhead** — Compiles down to the same code as manual duration creation
 
 ## Installation
 
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-duration-extender = "0.4"
+duration-extender = "0.5"
 ```
 
 ## Usage
 
 Import the `DurationExt` trait to unlock duration methods on integers:
-
 ```rust
 use duration_extender::DurationExt;
 use std::time::Duration;
 
 fn main() {
+    // Integer durations
     let timeout = 10.seconds();
     let delay = 5.minutes();
+    
+    // Fractional durations (v0.5.0+)
+    let half_sec = 0.5.seconds();
+    let two_and_half = 2.5.minutes();
 
     let total_time = 2.hours() + 30.minutes() + 15.seconds();
 
@@ -116,6 +138,12 @@ cache.insert_with_ttl("key", value, 24.hours());
 let rate_limit = RateLimit::new(100, 1.minutes());
 ```
 
+**Fractional timeouts:**
+```rust
+let timeout = 1.5.seconds();  // 1500 milliseconds
+let delay = 0.5.minutes();    // 30 seconds
+```
+
 ## Available Methods
 
 | Method | Equivalent |
@@ -131,16 +159,18 @@ let rate_limit = RateLimit::new(100, 1.minutes());
 
 The `DurationExt` trait is implemented for:
 
-- `u64` and `u32` — Direct conversion.
-- `i64` and `i32` — Panics on negative values to prevent bugs.
+- `u64` and `u32` — Direct conversion
+- `i64` and `i32` — Panics on negative values to prevent bugs
+- **`f64` and `f32` (NEW in v0.5.0)** — For fractional durations like `0.5.seconds()`
 
-All operations now use **checked arithmetic** to prevent silent overflow.
+All operations use **checked arithmetic** to prevent silent overflow.
 
 ## Safety Guarantees
 
-- **Overflow checked** — Panics on overflow with a clear message.
-- **Negative handling** — Signed integers panic on negative values with clear error messages.
-- **Type safety** — Uses Rust's strong type system for compile-time correctness.
+- **Overflow checked** — Panics on overflow with a clear message
+- **Negative handling** — Signed integers and floats panic on negative values with clear error messages
+- **NaN/Infinity handling** — Float types panic on NaN and infinity (handled by `std::time::Duration`)
+- **Type safety** — Uses Rust's strong type system for compile-time correctness
 
 ## Contributing
 
@@ -156,4 +186,4 @@ Choose whichever license suits your needs.
 
 ## Acknowledgments
 
-Inspired by ergonomic duration APIs in other ecosystems and refined by community feedback.
+Inspired by ergonomic duration APIs in other ecosystems and refined by community feedback from @oconnor663, @burntsushi, @nik-rev, and others.
