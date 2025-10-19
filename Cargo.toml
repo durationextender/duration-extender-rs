@@ -1,0 +1,13 @@
+[package]
+name = "duration-extender"
+version = "0.1.0"
+edition = "2021" 
+authors = ["Dr. Vegapunk"]
+description = "Adds fluent, highly readable methods (like .minutes(), .hours()) directly to integer types (u32, i64, etc.) to easily create std::time::Duration."
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/durationextender/duration-extender-rs" 
+keywords = ["time", "duration", "extender", "fluent"]
+categories = ["date-and-time", "rust-patterns"]
+
+[dependencies]
