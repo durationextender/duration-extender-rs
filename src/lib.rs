@@ -93,69 +93,91 @@ impl DurationExt for u32 {
 
 impl DurationExt for i64 {
     fn seconds(self) -> Duration {
-        Duration::from_secs(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} seconds", self);
+        Duration::from_secs(self as u64)
     }
 
     fn minutes(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(60))
+        assert!(self >= 0, "duration cannot be negative: got {} minutes", self);
+                                                   
+        Duration::from_secs((self as u64).saturating_mul(60))
     }
 
     fn hours(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(3600))
+        assert!(self >= 0, "duration cannot be negative: got {} hours", self);
+                                                         
+        Duration::from_secs((self as u64).saturating_mul(3600))
     }
 
     fn days(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(86400))
+        assert!(self >= 0, "duration cannot be negative: got {} days", self);
+                                                           
+        Duration::from_secs((self as u64).saturating_mul(86400))
     }
 
     fn weeks(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(604800))
+        assert!(self >= 0, "duration cannot be negative: got {} weeks", self);
+                                                            
+        Duration::from_secs((self as u64).saturating_mul(604800))
     }
     
     fn milliseconds(self) -> Duration {
-        Duration::from_millis(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} milliseconds", self);
+                                                    
+        Duration::from_millis(self as u64)
     }
 
     fn microseconds(self) -> Duration {
-        Duration::from_micros(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} microseconds", self);
+                                                 
+        Duration::from_micros(self as u64)
     }
 
     fn nanoseconds(self) -> Duration {
-        Duration::from_nanos(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} nanoseconds", self);                                                    
+        Duration::from_nanos(self as u64)
     }
 }
 
 impl DurationExt for i32 {
     fn seconds(self) -> Duration {
-        Duration::from_secs(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} seconds", self);
+        Duration::from_secs(self as u64)
     }
 
     fn minutes(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(60))
+        assert!(self >= 0, "duration cannot be negative: got {} minutes", self);
+        Duration::from_secs((self as u64).saturating_mul(60))
     }
 
     fn hours(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(3600))
+        assert!(self >= 0, "duration cannot be negative: got {} hours", self);
+        Duration::from_secs((self as u64).saturating_mul(3600))
     }
 
     fn days(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(86400))
+        assert!(self >= 0, "duration cannot be negative: got {} days", self);
+        Duration::from_secs((self as u64).saturating_mul(86400))
     }
 
     fn weeks(self) -> Duration {
-        Duration::from_secs((self.abs() as u64).saturating_mul(604800))
+        assert!(self >= 0, "duration cannot be negative: got {} weeks", self);
+        Duration::from_secs((self as u64).saturating_mul(604800))
     }
 
     fn milliseconds(self) -> Duration {
-        Duration::from_millis(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} milliseconds", self);
+        Duration::from_millis(self as u64)
     }
 
     fn microseconds(self) -> Duration {
-        Duration::from_micros(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} microseconds", self);
+        Duration::from_micros(self as u64)
     }
 
     fn nanoseconds(self) -> Duration {
-        Duration::from_nanos(self.abs() as u64)
+        assert!(self >= 0, "duration cannot be negative: got {} nanoseconds", self);
+        Duration::from_nanos(self as u64)
     }
 }
 
@@ -205,34 +227,45 @@ mod tests {
 
     // --- I64 Tests ---
     #[test]
-    fn test_i64_positive_and_negative() {
-        let pos_ten: i64 = 10;
-        let neg_ten: i64 = -10;
+fn test_i64_positive() {
+    let pos_ten: i64 = 10;
+    assert_eq!(pos_ten.minutes(), Duration::from_secs(600));
+    assert_eq!(pos_ten.milliseconds(), Duration::from_millis(10));
+}
 
-        // Large units
-        assert_eq!(pos_ten.minutes(), Duration::from_secs(600));
-        assert_eq!(neg_ten.minutes(), Duration::from_secs(600));
+#[test]
+#[should_panic(expected = "duration cannot be negative")]
+fn test_i64_negative_panics() {
+    let neg_ten: i64 = -10;
+    let _ = neg_ten.minutes(); 
+}
 
-        // Small units
-        assert_eq!(pos_ten.milliseconds(), Duration::from_millis(10));
-        assert_eq!(neg_ten.milliseconds(), Duration::from_millis(10));
-    }
+#[test]
+fn test_i64_zero() {
+    let zero: i64 = 0;
+    assert_eq!(zero.seconds(), Duration::ZERO); 
+}
 
-    // --- I32 Tests ---
-    #[test]
-    fn test_i32_positive_and_negative() {
-        let pos_two: i32 = 2;
-        let neg_two: i32 = -2;
+// --- I32 Tests ---
+#[test]
+fn test_i32_positive() {
+    let pos_two: i32 = 2;
+    assert_eq!(pos_two.days(), Duration::from_secs(2 * 86400));
+    assert_eq!(pos_two.microseconds(), Duration::from_micros(2));
+}
 
-        // Large units
-        assert_eq!(pos_two.days(), Duration::from_secs(2 * 86400));
-        assert_eq!(neg_two.days(), Duration::from_secs(2 * 86400));
+#[test]
+#[should_panic(expected = "duration cannot be negative")]
+fn test_i32_negative_panics() {
+    let neg_two: i32 = -2;
+    let _ = neg_two.days(); 
+}
 
-        // Small units
-        assert_eq!(pos_two.microseconds(), Duration::from_micros(2));
-        assert_eq!(neg_two.microseconds(), Duration::from_micros(2));
-    }
-    
+#[test]
+fn test_i32_zero() {
+    let zero: i32 = 0;
+    assert_eq!(zero.seconds(), Duration::ZERO); 
+}
     // --- Saturation Test ---
     #[test]
     fn test_saturating_mul_no_panic() {

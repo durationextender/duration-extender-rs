@@ -10,6 +10,25 @@ Write expressive, human-readable code for timeouts, delays, and schedules withou
 
 ## Why duration-extender?
 
+## ⚠️ Breaking Changes in v0.2.0
+
+**Negative values now panic instead of using absolute value.**
+
+Previously in v0.1.0:
+```rust
+(-5).minutes() == 5.minutes() // ❌ Surprising - used abs()
+```
+
+Now in v0.2.0:
+```rust
+5.minutes()    // ✅ Works fine
+(-5).minutes() // ❌ Panics: "duration cannot be negative: got -5 minutes"
+```
+
+This change prevents silent bugs. See [CHANGELOG.md](CHANGELOG.md) for details.
+
+---
+
 **Before:**
 ```rust
 let timeout = Duration::from_secs(30);
@@ -28,17 +47,16 @@ let cache_ttl = 1.days();
 
 - **Fluent API** — Natural, readable syntax for duration creation
 - **Type-safe** — Works with `u64`, `u32`, `i64`, and `i32`
-- **Zero panics** — Uses saturating arithmetic and absolute values for signed integers
+- **Explicit errors** — Uses saturating arithmetic for overflow; panics on negative values with clear messages
 - **Zero dependencies** — Just the standard library
 - **Minimal overhead** — Compiles down to the same code as manual duration creation
 
 ## Installation
 
 Add this to your `Cargo.toml`:
-
 ```toml
 [dependencies]
-duration-extender = "0.1"
+duration-extender = "0.2"  # ← Change from 0.1
 ```
 
 ## Usage
@@ -62,9 +80,9 @@ fn main() {
     let retry_count = 3;
     let backoff = retry_count.seconds();
     
-    // Signed integers use absolute value (no panics)
-    let elapsed = (-100).seconds();
-    assert_eq!(elapsed, 100.seconds());
+    // Signed integers must be non-negative (panics on negative)
+    let elapsed = 100.seconds(); // ✅ Works
+    // let bad = (-100).seconds(); // ❌ Panics!
 }
 ```
 
@@ -109,14 +127,14 @@ The `DurationExt` trait provides these methods:
 The `DurationExt` trait is implemented for:
 
 - `u64` and `u32` — Direct conversion
-- `i64` and `i32` — Uses absolute value to prevent negative durations
+- `i64` and `i32` — Panics on negative values to prevent bugs
 
 All operations use **saturating arithmetic** to prevent overflow panics.
 
 ## Safety Guarantees
 
-- **No panics** — Saturating arithmetic ensures overflow-safe operations
-- **Negative handling** — Signed integers automatically convert to positive durations
+- **Overflow safe** — Saturating arithmetic prevents overflow panics
+- **Negative handling** — Signed integers panic on negative values with clear error messages
 - **Type safety** — Leverages Rust's type system for compile-time correctness
 
 ## Contributing
