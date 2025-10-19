@@ -1,5 +1,20 @@
 # Changelog
 
+
+---
+
+## [0.4.0] - 2025-10-19
+
+### Breaking Changes
+
+- **BREAKING**: Removed support for `.days()` and `.weeks()` methods.
+  - These methods were removed to prevent potential errors related to calendar and time zone irregularities (like Daylight Saving Time) when calculating fixed system-level durations.
+  - The maximum supported time unit for fluent creation is now **hours**.
+  - To represent fixed long durations, use the equivalent number of hours, e.g., `(7 * 24).hours()` instead of `7.days()`.
+
+---
+
+
 ## [0.3.0] - 2024-10-19
 
 ### Breaking Changes
@@ -25,10 +40,7 @@ Previously, overflow was silently handled, which could hide bugs. Panicking make
   - Previously: `(-5).minutes()` would equal `5.minutes()` (surprising!)
   - Now: `(-5).minutes()` panics with "duration cannot be negative: got -5 minutes".
 
-- **BREAKING**: Integer overflow during duration creation **panics** instead of silently saturating.
-  - Previously: Large values (e.g., `u64::MAX.minutes()`) would saturate.
-  - Now: Panics with descriptive message.
 
 ### Why this change?
 
-Panicking on negative and overflow values prevents silent bugs and ensures explicit, safe behavior.
+Panicking on negative values prevents silent bugs and ensures explicit, safe behavior.

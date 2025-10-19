@@ -8,6 +8,17 @@ A lightweight, zero-dependency Rust crate that extends primitive integer types w
 
 Write expressive, human-readable code for timeouts, delays, and schedules without the verbosity of `Duration::from_secs()`.
 
+## ⚠️ Breaking Changes in v0.4.0
+
+- `.days()` and `.weeks()` methods are **removed**.
+  ```rust
+  // ❌ Not allowed anymore
+  // let week = 1.weeks();
+
+  // ✅ Use hours instead
+  let week = (7 * 24).hours();
+  ```
+
 ## ⚠️ Breaking Changes in v0.3.0
 
 **Overflow values now panic for all integer types**, in addition to negative values panicking for signed integers.
@@ -40,7 +51,6 @@ let cache_ttl = Duration::from_secs(24 * 60 * 60);
 ```rust
 let timeout = 30.seconds();
 let delay = 5.minutes();
-let cache_ttl = 1.days();
 ```
 
 ## Features
@@ -56,7 +66,7 @@ let cache_ttl = 1.days();
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-duration-extender = "0.3"
+duration-extender = "0.4"
 ```
 
 ## Usage
@@ -70,7 +80,6 @@ use std::time::Duration;
 fn main() {
     let timeout = 10.seconds();
     let delay = 5.minutes();
-    let long_wait = 2.days();
 
     let total_time = 2.hours() + 30.minutes() + 15.seconds();
 
@@ -114,8 +123,6 @@ let rate_limit = RateLimit::new(100, 1.minutes());
 | `.seconds()` | `Duration::from_secs(n)` |
 | `.minutes()` | `Duration::from_secs(n * 60)` |
 | `.hours()` | `Duration::from_secs(n * 3600)` |
-| `.days()` | `Duration::from_secs(n * 86400)` |
-| `.weeks()` | `Duration::from_secs(n * 604800)` |
 | `.milliseconds()` | `Duration::from_millis(n)` |
 | `.microseconds()` | `Duration::from_micros(n)` |
 | `.nanoseconds()` | `Duration::from_nanos(n)` |
