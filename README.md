@@ -1,60 +1,137 @@
-duration-extender
+# duration-extender
 
-A small, idiomatic utility crate that extends primitive integer types (u64, i32, etc.) with fluent methods for creating standard library std::time::Duration objects.
+[![Crates.io](https://img.shields.io/crates/v/duration-extender.svg)](https://crates.io/crates/duration-extender)
+[![Documentation](https://docs.rs/duration-extender/badge.svg)](https://docs.rs/duration-extender)
+[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 
-This allows you to write highly readable and expressive code when defining timeouts, delays, or schedules.
+A lightweight, zero-dependency Rust crate that extends primitive integer types with intuitive methods for creating `std::time::Duration` objects.
 
-🚀 Getting Started
+Write expressive, human-readable code for timeouts, delays, and schedules without the verbosity of `Duration::from_secs()`.
 
-Add duration-extender to your Cargo.toml:
+## Why duration-extender?
 
+**Before:**
+```rust
+let timeout = Duration::from_secs(30);
+let delay = Duration::from_secs(5 * 60);
+let cache_ttl = Duration::from_secs(24 * 60 * 60);
+```
+
+**After:**
+```rust
+let timeout = 30.seconds();
+let delay = 5.minutes();
+let cache_ttl = 1.days();
+```
+
+## Features
+
+- **Fluent API** — Natural, readable syntax for duration creation
+- **Type-safe** — Works with `u64`, `u32`, `i64`, and `i32`
+- **Zero panics** — Uses saturating arithmetic and absolute values for signed integers
+- **Zero dependencies** — Just the standard library
+- **Minimal overhead** — Compiles down to the same code as manual duration creation
+
+## Installation
+
+Add this to your `Cargo.toml`:
+
+```toml
 [dependencies]
 duration-extender = "0.1"
+```
 
+## Usage
 
-💡 Usage
+Import the `DurationExt` trait to unlock duration methods on integers:
 
-To use the methods, you must bring the DurationExt trait into scope.
-
+```rust
 use duration_extender::DurationExt;
 use std::time::Duration;
 
 fn main() {
-    // Basic usage is extremely clear
+    // Create durations with clear, readable syntax
     let timeout = 10.seconds();
-    assert_eq!(timeout, Duration::from_secs(10));
-
-    // Works great for larger units
-    let long_delay = 5.minutes();
-    assert_eq!(long_delay.as_secs(), 300);
-
-    // Works with signed integers (i32, i64) by taking the absolute value
-    let past_due_time = (-2).hours();
-    assert_eq!(past_due_time.as_secs(), 7200);
-
-    // Combine types for easy calculation
-    let total_wait = 2.days() + 30.minutes();
+    let delay = 5.minutes();
+    let long_wait = 2.days();
+    
+    // Combine durations naturally
+    let total_time = 2.hours() + 30.minutes() + 15.seconds();
+    
+    // Works with variables
+    let retry_count = 3;
+    let backoff = retry_count.seconds();
+    
+    // Signed integers use absolute value (no panics)
+    let elapsed = (-100).seconds();
+    assert_eq!(elapsed, 100.seconds());
 }
+```
 
+### Real-World Examples
 
-⚙️ Supported Types
+**HTTP client timeout:**
+```rust
+let client = reqwest::Client::builder()
+    .timeout(30.seconds())
+    .build()?;
+```
 
-The DurationExt trait is implemented for:
+**Tokio sleep:**
+```rust
+tokio::time::sleep(2.seconds()).await;
+```
 
-u64
+**Cache expiration:**
+```rust
+cache.insert_with_ttl("key", value, 24.hours());
+```
 
-u32
+**Rate limiting:**
+```rust
+let rate_limit = RateLimit::new(100, 1.minutes());
+```
 
-i64
+## Available Methods
 
-i32
+The `DurationExt` trait provides these methods:
 
-All methods safely use saturating arithmetic and handle negative inputs by taking the absolute value, ensuring a panic-free experience.
+| Method | Equivalent |
+|--------|------------|
+| `.seconds()` | `Duration::from_secs(n)` |
+| `.minutes()` | `Duration::from_secs(n * 60)` |
+| `.hours()` | `Duration::from_secs(n * 3600)` |
+| `.days()` | `Duration::from_secs(n * 86400)` |
+| `.weeks()` | `Duration::from_secs(n * 604800)` |
 
-📝 License
+## Supported Types
 
-This project is licensed under either of:
+The `DurationExt` trait is implemented for:
 
-Apache License, Version 2.0
+- `u64` and `u32` — Direct conversion
+- `i64` and `i32` — Uses absolute value to prevent negative durations
 
-MIT license
+All operations use **saturating arithmetic** to prevent overflow panics.
+
+## Safety Guarantees
+
+- **No panics** — Saturating arithmetic ensures overflow-safe operations
+- **Negative handling** — Signed integers automatically convert to positive durations
+- **Type safety** — Leverages Rust's type system for compile-time correctness
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is dual-licensed under:
+
+- [Apache License, Version 2.0](LICENSE-APACHE)
+- [MIT License](LICENSE-MIT)
+
+You may choose either license for your purposes.
+
+## Acknowledgments
+
+Inspired by duration extension patterns from other languages and the Rust community's focus on ergonomic APIs.
