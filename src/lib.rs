@@ -53,13 +53,13 @@ impl DurationExt for u64 {
 
     fn minutes(self) -> Duration {
         let secs = self.checked_mul(60)
-            .expect(&format!("duration value {} minutes overflows u64 seconds capacity", self));
+            .unwrap_or_else(|| panic!("duration value {} minutes overflows u64 seconds capacity", self));
         Duration::from_secs(secs)
     }
 
     fn hours(self) -> Duration {
         let secs = self.checked_mul(3600)
-            .expect(&format!("duration value {} hours overflows u64 seconds capacity", self));
+            .unwrap_or_else(|| panic!("duration value {} hours overflows u64 seconds capacity", self));
         Duration::from_secs(secs)
     }
 
