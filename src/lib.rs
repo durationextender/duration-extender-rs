@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// An extension trait that adds fluent time unit methods to integer primitives,
 /// allowing for highly readable time duration creation.
@@ -226,6 +226,65 @@ impl DurationExt for f32 {
     }
 }
 
+/// Extension trait for `Duration` providing convenient methods
+/// to compute `Instant`s relative to the current time or another instant.
+///
+/// This trait allows expressing time calculations in a natural and readable way:
+///
+/// ```
+/// use std::time::{Duration, Instant};
+/// use duration_extender::{DurationExt, InstantExt};
+///
+/// let five_secs_ago = 5.seconds().ago();
+/// let in_two_secs = 2.seconds().ahead();
+///
+/// let now = Instant::now();
+/// let before_now = 3.seconds().before(now);
+/// let after_now = 10.seconds().after(now);
+/// ```
+///
+/// # Example
+/// ```
+/// use std::time::{Duration, Instant};
+/// use duration_extender::{DurationExt, InstantExt};
+///
+/// assert!(Duration::from_secs(1).ago() < Instant::now());
+/// assert!(Duration::from_secs(1).ahead() > Instant::now());
+/// ```
+
+pub trait InstantExt {
+    /// Returns an [`Instant`] representing this duration *before* now.
+    fn ago(self) -> Instant;
+    /// Returns an [`Instant`] representing this duration *after* now.
+    fn ahead(self) -> Instant;
+    /// Returns an [`Instant`] representing this duration *before* the given instant.
+    fn before(self, instant: Instant) -> Instant;
+    /// Returns an [`Instant`] representing this duration *after* the given instant.
+    fn after(self, instant: Instant) -> Instant;
+}
+
+impl InstantExt for Duration {
+    fn after(self, instant: Instant) -> Instant {
+        instant
+            .checked_add(self)
+            .expect("Cannot add the duration to this time instant.")
+    }
+
+    fn before(self, instant: Instant) -> Instant {
+        instant
+            .checked_sub(self)
+            .expect("Cannot deduct the duration from this time instant.")
+    }
+
+    fn ago(self) -> Instant {
+        self.before(Instant::now())
+    }
+
+    fn ahead(self) -> Instant {
+        self.after(Instant::now())
+    }
+}
+
 // ===== Tests =====
 #[cfg(test)]
 mod tests {
@@ -365,5 +424,27 @@ mod tests {
     #[should_panic]
     fn test_f32_nan_panics() {
         let _ = f32::NAN.seconds();
+    }
+
+    #[test]
+    fn test_before() {
+        let now = Instant::now();
+
+        let past = 5.seconds().before(now);
+        assert_eq!(now - past, 5.seconds());
+    }
+
+    #[test]
+    fn test_after() {
+        let now = Instant::now();
+
+        let future = 5.seconds().after(now);
+        assert_eq!(future - now, 5.seconds());
+    }
+
+    #[test]
+    #[should_panic = "Cannot add the duration to this time instant."]
+    fn test_after_panic() {
+        u64::MAX.seconds().after(Instant::now());
     }
 }
